@@ -1,52 +1,23 @@
 import gradio as gr
 from PIL import Image
 import os
-from threading import Lock
+import spaces
 
 from OmniGen import OmniGenPipeline
 
-class OmniGenManager:
-    def __init__(self):
-        self.pipe = None
-        self.lock = Lock()
-        self.current_quantization = None
+pipe = OmniGenPipeline.from_pretrained(
+    "Shitao/OmniGen-v1"
+)
 
-    def get_pipeline(self, quantization: bool) -> OmniGenPipeline:
-        """
-        Get or initialize the pipeline with the specified quantization setting.
-        Uses a lock to ensure thread safety.
-        """
-        with self.lock:
-            # Only reinitialize if quantization setting changed or pipeline doesn't exist
-            if self.pipe is None or self.current_quantization != quantization:
-                # Clear any existing pipeline
-                if self.pipe is not None:
-                    del self.pipe
-                    self.pipe = None
-
-                # Initialize new pipeline
-                self.pipe = OmniGenPipeline.from_pretrained(
-                    "Shitao/OmniGen-v1",
-                    Quantization=quantization
-                )
-                self.current_quantization = quantization
-
-            return self.pipe
-
-# Create a single instance of the manager
-pipeline_manager = OmniGenManager()
-
-def generate_image(text, img1, img2, img3, height, width, guidance_scale, img_guidance_scale, inference_steps, seed, quantization):
+@spaces.GPU(duration=180)
+# 示例处理函数：生成图像
+def generate_image(text, img1, img2, img3, height, width, guidance_scale, img_guidance_scale, inference_steps, seed):
     input_images = [img1, img2, img3]
     # 去除 None
     input_images = [img for img in input_images if img is not None]
     if len(input_images) == 0:
         input_images = None
 
-    # Get or initialize pipeline with current settings
-    pipe = pipeline_manager.get_pipeline(quantization)
-
-    # Generate image
     output = pipe(
         prompt=text,
         input_images=input_images,
@@ -302,10 +273,6 @@ with gr.Blocks() as demo:
                 label="Inference Steps", minimum=1, maximum=100, value=50, step=1
             )
 
-            Quantization = gr.Checkbox(
-                label="Low VRAM (8-bit Quantization)", value=False
-            )
-
             seed_input = gr.Slider(
                 label="Seed", minimum=0, maximum=2147483647, value=42, step=1
             )
@@ -331,7 +298,6 @@ with gr.Blocks() as demo:
             img_guidance_scale_input,
             num_inference_steps,
             seed_input,
-            Quantization,
         ],
         outputs=output_image,
     )
@@ -350,7 +316,6 @@ with gr.Blocks() as demo:
             img_guidance_scale_input,
             num_inference_steps,
             seed_input,
-            Quantization,
         ],
         outputs=output_image,
     )
