@@ -303,7 +303,7 @@ with gr.Blocks() as demo:
             )
 
             Quantization = gr.Checkbox(
-                label="Low VRAM (8-bit Quantization)", value=False
+                label="Low VRAM (8-bit Quantization)", value=True
             )
 
             seed_input = gr.Slider(
