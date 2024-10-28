@@ -67,8 +67,9 @@ If you are not entirely satisfied with certain functionalities or wish to add ne
 
 ## 5. Quick Start
 
-### Please refer youtube video
+### Please refer youtube video for installation
 
+https://www.youtube.com/watch?v=9ZXmXA2AJZ4
 
 
 ## License
